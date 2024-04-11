@@ -15,14 +15,15 @@ datasource db {
 }
 
 model User {
-  id           Int         @id @default(autoincrement())
-  guid         String      @unique @default(uuid()) @db.Uuid
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  commands     Command[]
-  reward       Reward[]
-  settings     Settings[]
-  userToken    UserToken[]
+  id             Int              @id @default(autoincrement())
+  guid           String           @unique @default(uuid()) @db.Uuid
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  commands       Command[]
+  reward         Reward[]
+  settings       Settings[]
+  userToken      UserToken[]
+  userActionData UserActionData[]
 }
 
 model UserToken {
@@ -72,14 +73,15 @@ model Command {
 }
 
 model Action {
-  id          Int       @id @default(autoincrement())
-  name        String    @unique @db.VarChar(255)
-  title       String    @db.VarChar(255)
-  description String    @default("") @db.VarChar(255)
-  command     Command[]
-  reward      Reward[]
+  id             Int              @id @default(autoincrement())
+  name           String           @unique @db.VarChar(255)
+  title          String           @db.VarChar(255)
+  description    String           @default("") @db.VarChar(255)
+  command        Command[]
+  reward         Reward[]
+  userActionData UserActionData[]
   /// [ActionData]
-  data        Json      @default("{}") @db.JsonB()
+  data           Json             @default("{}") @db.JsonB()
 }
 
 model Platform {
@@ -100,4 +102,14 @@ model Reward {
   platformRewardId String
   /// [ActionableData]
   data             Json     @default("{}") @db.JsonB()
+}
+
+model UserActionData {
+  id       Int    @id @default(autoincrement())
+  actionId Int
+  action   Action @relation(fields: [actionId], references: [id])
+  userId   Int
+  user     User   @relation(fields: [userId], references: [id])
+  /// [ActionData]
+  data     Json   @default("{}") @db.JsonB()
 }

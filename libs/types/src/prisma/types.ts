@@ -9,8 +9,13 @@ declare global {
 
     type ActionData = Record<string, string | number | undefined>;
 
+    type ActionArgument = {
+      name: string;
+      isPersistent: boolean;
+    };
+
     type ActionableData = {
-      arguments: string[];
+      arguments: ActionArgument[];
       action: ActionData;
     };
   }

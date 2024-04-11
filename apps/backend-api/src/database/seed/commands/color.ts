@@ -43,7 +43,10 @@ export async function defaultColorCommandSeed(
           },
         },
         data: {
-          arguments: ['color'],
+          arguments: [{
+            name: 'color',
+            isPersistent: true,
+          }],
           action: {},
         },
       },

@@ -1,19 +1,19 @@
 import {
-  ChatterEntity,
   MessageEntity,
   RaidData,
+  TwitchChatterEntity,
   UserActionEntity,
   isColorUserActionEntity,
   isDashUserActionEntity,
   isGrowUserActionEntity,
   isJumpUserActionEntity,
 } from '@lib/types';
-import tinycolor from 'tinycolor2';
-import { config } from '../config/config';
-import { timers } from '../helpers/timer';
-import { app } from '../app';
-import { Dude, DudeProps } from '../entities/Dude';
 import * as PIXI from 'pixi.js';
+import tinycolor from 'tinycolor2';
+import { app } from '../app';
+import { config } from '../config/config';
+import { Dude, DudeProps } from '../entities/Dude';
+import { timers } from '../helpers/timer';
 
 type DudesManagerSubscription = {
   onAdd: (dude: Dude) => void;
@@ -56,8 +56,15 @@ class DudesManager {
 
     const time = (1 / data.viewers) * 5000;
 
+    const spriteConfig = config.sprites['agent'];
+
     for (let i = 0; i < data.viewers; i++) {
-      const dude = new Dude({ isAnonymous: true, zIndex: -1 });
+      const dude = new Dude({
+        isAnonymous: true,
+        zIndex: -1,
+        sprite: spriteConfig,
+        color: new PIXI.Color(data.broadcaster.info.color),
+      });
 
       timers.add(time * i, () => {
         this.addRaider(dude);
@@ -102,7 +109,7 @@ class DudesManager {
     }
   }
 
-  public processChatters(data: ChatterEntity[]) {
+  public processChatters(data: TwitchChatterEntity[]) {
     for (const id in this.viewers) {
       const lastMessageTime = this.lastDudeActivity[id];
       const spawnedRecently =
@@ -154,7 +161,7 @@ class DudesManager {
     }
 
     if (isDashUserActionEntity(action)) {
-      dude.dash({force: action.data.force, cooldown: action.cooldown});
+      dude.dash({ force: action.data.force, cooldown: action.cooldown });
     }
 
     if (isColorUserActionEntity(action)) {
@@ -174,16 +181,20 @@ class DudesManager {
     }
   }
 
-  private prepareDudeProps(name: string, color?: string): DudeProps {
+  private prepareDudeProps(
+    name: string,
+    color?: string,
+    sprite?: string
+  ): DudeProps {
     const props: DudeProps = {
       name,
       isAnonymous: false,
     };
 
-    const sprite = config.chatters[name];
+    const spriteConfig = sprite ? config.sprites[sprite] : null;
 
-    if (sprite) {
-      props.sprite = sprite;
+    if (spriteConfig) {
+      props.sprite = spriteConfig;
     }
 
     if (color) {
@@ -198,7 +209,8 @@ class DudesManager {
 
     const props: DudeProps = this.prepareDudeProps(
       action.info.displayName,
-      action.info.color
+      action.info.color,
+      action.info.sprite
     );
 
     if (!dude) {
@@ -223,7 +235,8 @@ class DudesManager {
   public processMessage(data: MessageEntity): void {
     const props: DudeProps = this.prepareDudeProps(
       data.info.displayName,
-      data.info.color
+      data.info.color,
+      data.info.sprite
     );
 
     let dude = this.viewers[data.userId];

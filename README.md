@@ -17,7 +17,9 @@ Run `pnpm run db:seed`
 3. Run `pnpm run dev`
 
 http://localhost:3000 - admin panel backend
+
 http://localhost:4200 - admin panel frontend
+
 http://localhost:4300 - client
 
 ## Linters
